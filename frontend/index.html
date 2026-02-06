@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NFT Dutch Auction</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e5e7eb; padding: 20px; text-align: center; }
+    
+    .status-container { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #334155; display: inline-block; min-width: 400px; }
+    h1 { margin: 0 0 10px 0; color: #38bdf8; text-transform: uppercase; letter-spacing: 2px; }
+    #price { font-size: 2.5em; font-weight: bold; margin: 10px 0; color: #fbbf24; font-family: monospace; }
+    #wallet { color: #94a3b8; font-size: 0.9em; margin-bottom: 10px; }
+    
+    button { cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; }
+    .btn-connect { background: #3b82f6; color: white; padding: 10px 20px; font-size: 1rem; }
+    
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-width: 1200px; margin: 0 auto; }
+    .card { background: #1e293b; border: 1px solid #334155; padding: 10px; border-radius: 8px; position: relative; }
+    .card img { width: 100%; height: 120px; object-fit: cover; background: #334155; border-radius: 4px; margin-bottom: 8px; }
+    
+    .btn-buy { background: #22c55e; color: white; width: 100%; padding: 8px; }
+    .btn-buy:hover { background: #16a34a; }
+    .btn-buy:disabled { background: #64748b; cursor: not-allowed; opacity: 0.7; }
+    
+    .sold { opacity: 0.5; pointer-events: none; }
+    .sold::after { content: "SOLD"; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg); color: #ef4444; font-size: 1.5em; font-weight: 900; border: 3px solid #ef4444; padding: 5px; background: rgba(15, 23, 42, 0.9); }
+  </style>
+</head>
+<body>
+
+  <div class="status-container">
+    <h1>🇳🇱 NFT Dutch Auction</h1>
+    <div id="wallet">Status: Not Connected</div>
+    <div id="price">-- ETH</div>
+    <button class="btn-connect" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+
+  <div class="grid" id="nftGrid"></div>
+
+  <script>
+    // 🔴 PASTE NEW CONTRACT ADDRESS HERE
+    const CONTRACT_ADDRESS = "PASTE_YOUR_NEW_ADDRESS_HERE"; 
+    
+    const ABI = [
+      "function getPrice() view returns (uint256)",
+      "function buy(uint256 _id) payable",
+      "function owners(uint256) view returns (address)",
+      "function startAt() view returns (uint256)",
+      "function ended() view returns (bool)" // Added check for end status
+    ];
+
+    let provider, signer, contract;
+    const TOTAL_ITEMS = 100;
+
+    async function connectWallet() {
+      if (!window.ethereum) return alert("Install MetaMask!");
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      
+      const addr = await signer.getAddress();
+      document.getElementById("wallet").innerText = "Connected: " + addr.substring(0,6) + "...";
+      
+      contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+      
+      checkAuctionStatus();
+      setInterval(checkAuctionStatus, 1000); 
+      renderGrid();
+    }
+
+    async function checkAuctionStatus() {
+      if (!contract) return;
+      
+      try {
+        const ended = await contract.ended();
+        const startAt = await contract.startAt();
+        
+        if (ended) {
+          // --- CASE 3: STOPPED BY TEACHER ---
+          document.getElementById("price").innerText = "AUCTION ENDED";
+          document.getElementById("price").style.color = "#ef4444"; // Red
+          document.getElementById("price").style.fontSize = "2em";
+          disableAllButtons(true, "ENDED");
+        } else if (startAt.toNumber() === 0) {
+          // --- CASE 1: NOT STARTED ---
+          document.getElementById("price").innerText = "WAITING FOR START...";
+          document.getElementById("price").style.color = "#f59e0b"; // Orange
+          document.getElementById("price").style.fontSize = "1.5em";
+          disableAllButtons(true, "WAITING...");
+        } else {
+          // --- CASE 2: LIVE ---
+          const priceWei = await contract.getPrice();
+          const priceEth = ethers.utils.formatEther(priceWei).substring(0,6);
+          document.getElementById("price").innerText = priceEth + " ETH";
+          document.getElementById("price").style.color = "#22c55e"; // Green
+          document.getElementById("price").style.fontSize = "2.5em";
+          
+          updateButtonPrices(priceEth);
+          enableUnsoldButtons();
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    function updateButtonPrices(price) {
+        const buttons = document.querySelectorAll(".btn-buy");
+        buttons.forEach(btn => {
+            if (!btn.disabled) btn.innerText = `BUY @ ${price}`;
+        });
+    }
+
+    function disableAllButtons(shouldDisable, text) {
+        const buttons = document.querySelectorAll(".btn-buy");
+        buttons.forEach(btn => {
+             if (!btn.closest('.card').classList.contains('sold')) {
+                 btn.disabled = shouldDisable;
+                 if (text) btn.innerText = text;
+             }
+        });
+    }
+
+    function enableUnsoldButtons() {
+        const buttons = document.querySelectorAll(".btn-buy");
+        buttons.forEach(btn => {
+             if (!btn.closest('.card').classList.contains('sold')) {
+                 btn.disabled = false;
+                 // Text update handled by updateButtonPrices
+             }
+        });
+    }
+
+    async function renderGrid() {
+      const grid = document.getElementById("nftGrid");
+      grid.innerHTML = "";
+
+      const promises = [];
+      for (let i = 0; i < TOTAL_ITEMS; i++) {
+        promises.push(contract.owners(i).then(owner => ({ id: i, owner })));
+      }
+      
+      const results = await Promise.all(promises);
+
+      results.forEach(item => {
+        const isSold = item.owner !== "0x0000000000000000000000000000000000000000";
+        const card = document.createElement("div");
+        card.className = isSold ? "card sold" : "card";
+        const imgUrl = `https://via.placeholder.com/150/334155/ffffff?text=NFT+%23${item.id}`;
+
+        card.innerHTML = `
+            <img src="${imgUrl}">
+            <div style="font-weight:bold; margin-bottom:5px;">NFT #${item.id}</div>
+            <button class="btn-buy" onclick="buyNFT(${item.id})" ${isSold ? 'disabled' : ''}>
+                ${isSold ? 'SOLD' : 'WAITING...'}
+            </button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    async function buyNFT(id) {
+      if (!contract) return;
+      try {
+        const price = await contract.getPrice();
+        const tx = await contract.buy(id, { value: price });
+        
+        const btn = document.querySelectorAll(".btn-buy")[id];
+        btn.innerText = "MINING...";
+        
+        await tx.wait();
+        alert("Got it!");
+        location.reload(); 
+      } catch (err) {
+        alert(err.reason || err.message);
+      }
+    }
+  </script>
+</body>
+</html>
