@@ -56,14 +56,17 @@ contract NFTDutchAuction {
 
         uint256 refund = msg.value - price;
         if (refund > 0) {
-            payable(msg.sender).call{value: refund}("");
+            (bool success, ) = payable(msg.sender).call{value: refund}("");
+            require(success, "Refund failed");
         }
     }
 
     // NEW: WITHDRAW FUNCTION (Get your money!)
     function withdraw() external {
         require(msg.sender == administrator, "Only Admin can withdraw");
-        payable(administrator).transfer(address(this).balance);
+        uint256 balance = address(this).balance;
+        (bool success, ) = payable(administrator).call{value: balance}("");
+        require(success, "Withdrawal failed");
     }
 
     function getOwner(uint256 _id) external view returns (address) {
