@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CyberPunk Auction</title>
+  <title>Student Art Auction</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
 
   <style>
-    /* --- RESET & BASE --- */
+    /* --- STYLES (Modern Dark Mode) --- */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', sans-serif;
-      background: radial-gradient(circle at top, #1e293b, #0f172a);
+      background: #0f172a;
       color: #e2e8f0;
       min-height: 100vh;
       display: flex;
@@ -21,188 +21,113 @@
       align-items: center;
       padding: 40px 20px;
     }
-
-    /* --- HERO SECTION --- */
-    .hero {
-      text-align: center;
-      margin-bottom: 40px;
-      max-width: 800px;
-      width: 100%;
-    }
     h1 {
       font-family: 'Orbitron', sans-serif;
-      font-size: 3rem;
-      background: linear-gradient(90deg, #38bdf8, #818cf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 10px;
-      text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
-    }
-    .status-badge {
-      display: inline-block;
-      padding: 8px 16px;
-      border-radius: 20px;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid #334155;
-      font-size: 0.9rem;
-      color: #94a3b8;
+      font-size: 2.5rem;
+      color: #38bdf8;
       margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
     }
-
-    /* --- DASHBOARD (Glass Effect) --- */
+    
+    /* Dashboard */
     .dashboard {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 20px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 1000px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 20px 30px;
-      border-radius: 16px;
-      width: 100%;
-      max-width: 1000px;
-      margin-bottom: 40px;
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-      flex-wrap: wrap;
-      gap: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-    
-    .price-box { text-align: left; }
-    .price-label { font-size: 0.85rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-    .price-value { font-family: 'Orbitron', sans-serif; font-size: 2.5rem; color: #fbbf24; text-shadow: 0 0 15px rgba(251, 191, 36, 0.4); }
+    .price-display { font-family: 'Orbitron', sans-serif; font-size: 2rem; color: #22c55e; }
+    .btn-connect { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; }
+    .btn-connect:hover { background: #2563eb; }
 
-    .btn-connect {
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .btn-connect:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
-
-    /* --- PROGRESS BAR --- */
-    .progress-container { width: 100%; height: 6px; background: #334155; border-radius: 3px; margin-top: 15px; overflow: hidden; }
-    .progress-bar { height: 100%; background: #fbbf24; width: 0%; transition: width 1s linear; }
-
-    /* --- NFT GRID --- */
+    /* Grid */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 20px;
       width: 100%;
       max-width: 1200px;
     }
-
     .card {
-      background: rgba(30, 41, 59, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: #1e293b;
+      border: 1px solid #334155;
       border-radius: 12px;
-      padding: 15px;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
+      padding: 10px;
+      transition: transform 0.2s;
     }
-    .card:hover { transform: translateY(-5px); border-color: #38bdf8; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+    .card:hover { transform: translateY(-5px); border-color: #38bdf8; }
     
     .card img {
       width: 100%;
-      height: 180px;
+      height: 200px;
       object-fit: cover;
-      background: #0f172a;
       border-radius: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
+      background: #0f172a;
     }
-
-    .card h3 { font-size: 1rem; margin-bottom: 8px; color: #e2e8f0; }
-
+    .card h3 { font-size: 1rem; margin-bottom: 5px; color: #cbd5e1; display: flex; justify-content: space-between; }
+    
+    /* Buy Button */
     .btn-buy {
       width: 100%;
       padding: 10px;
       border: none;
       border-radius: 6px;
-      background: #10b981;
+      background: #22c55e;
       color: white;
       font-weight: bold;
       cursor: pointer;
       text-transform: uppercase;
-      font-size: 0.9rem;
-      transition: 0.2s;
     }
-    .btn-buy:hover { background: #059669; }
-    .btn-buy:disabled { background: #475569; cursor: not-allowed; opacity: 0.7; }
+    .btn-buy:hover { background: #16a34a; }
+    .btn-buy:disabled { background: #64748b; cursor: not-allowed; opacity: 0.5; }
 
-    /* --- SOLD STATE --- */
-    .sold { border-color: #ef4444; opacity: 0.7; }
-    .sold .btn-buy { background: #ef4444; }
+    /* Sold State */
+    .sold { opacity: 0.6; pointer-events: none; position: relative; }
     .sold::after {
       content: "SOLD";
       position: absolute;
       top: 50%; left: 50%;
-      transform: translate(-50%, -50%) rotate(-20deg);
-      font-family: 'Orbitron', sans-serif;
-      font-size: 2rem;
-      font-weight: bold;
+      transform: translate(-50%, -50%) rotate(-15deg);
       color: #ef4444;
+      font-weight: 900;
+      font-size: 2rem;
       border: 4px solid #ef4444;
-      padding: 5px 15px;
+      padding: 5px 10px;
       background: rgba(15, 23, 42, 0.9);
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
     }
-
-    /* --- TOAST NOTIFICATION --- */
-    #toast {
-      visibility: hidden;
-      min-width: 250px;
-      background-color: #333;
-      color: #fff;
-      text-align: center;
-      border-radius: 8px;
-      padding: 16px;
-      position: fixed;
-      z-index: 1;
-      bottom: 30px;
-      right: 30px;
-      font-size: 17px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-      border-left: 5px solid #10b981;
-    }
-    #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-    
-    @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-    @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
   </style>
 </head>
 <body>
 
-  <div class="hero">
-    <h1>Mecha-Squad Auction</h1>
-    <div class="status-badge" id="wallet">Wallet: Not Connected</div>
-  </div>
+  <h1>🎨 Student Art Auction</h1>
 
   <div class="dashboard">
-    <div class="price-box">
-      <div class="price-label">Current Price</div>
-      <div class="price-value" id="price">-- ETH</div>
-      
-      <div class="progress-container">
-        <div class="progress-bar" id="priceBar"></div>
-      </div>
+    <div>
+      <div style="color: #94a3b8; font-size: 0.9rem;">CURRENT PRICE</div>
+      <div class="price-display" id="price">-- ETH</div>
     </div>
-    
-    <button class="btn-connect" onclick="connectWallet()">CONNECT WALLET</button>
+    <button class="btn-connect" onclick="connectWallet()" id="connectBtn">Connect Wallet</button>
   </div>
 
   <div class="grid" id="nftGrid"></div>
 
-  <div id="toast">Transaction Sent!</div>
-
   <script>
     // -----------------------------------------------------------
-    // 🔴 1. PASTE YOUR CONTRACT ADDRESS HERE
-    const CONTRACT_ADDRESS = "PASTE_YOUR_ADDRESS_HERE"; 
+    // 🔴 1. PASTE CONTRACT ADDRESS
+    const CONTRACT_ADDRESS = "PASTE_YOUR_CONTRACT_ADDRESS_HERE"; 
+    
+    // 🔴 2. PASTE PINATA LINK (Must end with a slash /)
+    // Example: "https://gateway.pinata.cloud/ipfs/QmXyZ123.../"
+    const IPFS_BASE_URL = "PASTE_YOUR_PINATA_LINK_HERE/";
     // -----------------------------------------------------------
 
     const ABI = [
@@ -210,36 +135,27 @@
       "function buy(uint256 _id) payable",
       "function owners(uint256) view returns (address)",
       "function startAt() view returns (uint256)",
-      "function ended() view returns (bool)",
-      "function hasBought(address) view returns (bool)"
+      "function ended() view returns (bool)"
     ];
 
     let provider, signer, contract;
-    const TOTAL_ITEMS = 100;
-    const START_PRICE = 0.05;
-    const FLOOR_PRICE = 0.02;
+    const TOTAL_ITEMS = 100; // MUST MATCH YOUR IMAGE COUNT
 
     async function connectWallet() {
-      if (!window.ethereum) return showToast("Please install MetaMask!", true);
+      if (!window.ethereum) return alert("Please install MetaMask!");
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
       
-      try {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
-        const addr = await signer.getAddress();
-        
-        document.getElementById("wallet").innerText = "Connected: " + addr.substring(0,6) + "..." + addr.substring(38);
-        document.querySelector(".btn-connect").innerText = "CONNECTED";
-        document.querySelector(".btn-connect").style.background = "#10b981"; // Green
-        
-        contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-        
-        checkAuctionStatus();
-        setInterval(checkAuctionStatus, 1000); 
-        renderGrid();
-      } catch (err) {
-        console.error(err);
-      }
+      const addr = await signer.getAddress();
+      document.getElementById("connectBtn").innerText = addr.substring(0,6) + "...";
+      document.getElementById("connectBtn").style.background = "#059669";
+      
+      contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+      
+      checkAuctionStatus();
+      setInterval(checkAuctionStatus, 1000); 
+      renderGrid();
     }
 
     async function checkAuctionStatus() {
@@ -249,40 +165,27 @@
         const startAt = await contract.startAt();
         
         if (ended) {
-          updateStatus("AUCTION ENDED", "#ef4444", 0);
-          disableAllButtons(true, "ENDED");
+          document.getElementById("price").innerText = "ENDED";
+          document.getElementById("price").style.color = "#ef4444";
+          disableAllButtons(true);
         } else if (startAt.toNumber() === 0) {
-          updateStatus("WAITING FOR START...", "#3b82f6", 100);
-          disableAllButtons(true, "WAITING...");
+          document.getElementById("price").innerText = "WAITING...";
+          document.getElementById("price").style.color = "#f59e0b";
+          disableAllButtons(true);
         } else {
-          // LIVE
           const priceWei = await contract.getPrice();
-          const priceEth = parseFloat(ethers.utils.formatEther(priceWei));
+          const priceEth = ethers.utils.formatEther(priceWei);
+          document.getElementById("price").innerText = parseFloat(priceEth).toFixed(4) + " ETH";
           
-          // Calculate Percentage for Progress Bar
-          // (Current - Floor) / (Start - Floor) * 100
-          let percentage = ((priceEth - FLOOR_PRICE) / (START_PRICE - FLOOR_PRICE)) * 100;
-          if (percentage < 0) percentage = 0;
-          
-          updateStatus(priceEth.toFixed(4) + " ETH", "#fbbf24", percentage);
-          
-          const buttons = document.querySelectorAll(".btn-buy");
-          buttons.forEach(btn => {
-            if (!btn.disabled && !btn.innerText.includes("MINING")) {
-              btn.innerText = `BUY @ ${priceEth.toFixed(4)}`;
-            }
+          // Update button prices
+          document.querySelectorAll(".btn-buy").forEach(btn => {
+             if (!btn.disabled && btn.innerText !== "MINING...") {
+                 btn.innerText = `BUY @ ${parseFloat(priceEth).toFixed(4)}`;
+             }
           });
-          
           enableUnsoldButtons();
         }
       } catch (e) { console.error(e); }
-    }
-
-    function updateStatus(text, color, progressPercent) {
-      const priceEl = document.getElementById("price");
-      priceEl.innerText = text;
-      priceEl.style.color = color;
-      document.getElementById("priceBar").style.width = progressPercent + "%";
     }
 
     async function renderGrid() {
@@ -297,20 +200,20 @@
 
       results.forEach(item => {
         const isSold = item.owner !== "0x0000000000000000000000000000000000000000";
+        
+        // DIRECT LINK TO IMAGE - NO MYSTERY
+        const imgUrl = `${IPFS_BASE_URL}${item.id}.png`;
+
         const card = document.createElement("div");
         card.className = isSold ? "card sold" : "card";
         
-        // --- NEW: ROBO IMAGE GENERATOR ---
-        const imgUrl = `https://robohash.org/${item.id}?set=set1&bgset=bg1&size=200x200`;
-
         card.innerHTML = `
-            <img src="${imgUrl}" loading="lazy">
-            <h3 style="display:flex; justify-content:space-between;">
-                <span>Robot #${item.id}</span>
-                <span style="font-size:0.8em; opacity:0.6">#${item.id}</span>
+            <img src="${imgUrl}" onerror="this.src='https://via.placeholder.com/200?text=Image+Error'">
+            <h3>
+                <span>Artwork #${item.id}</span>
             </h3>
             <button class="btn-buy" onclick="buyNFT(${item.id})" ${isSold ? 'disabled' : ''}>
-                ${isSold ? 'SOLD OUT' : 'WAITING...'}
+                ${isSold ? 'SOLD' : 'WAITING...'}
             </button>
         `;
         grid.appendChild(card);
@@ -319,58 +222,37 @@
 
     async function buyNFT(id) {
       if (!contract) return;
-      
       const btn = document.querySelectorAll(".btn-buy")[id];
-      const originalText = btn.innerText;
-      
+      const oldText = btn.innerText;
+
       try {
         btn.innerText = "MINING...";
         btn.disabled = true;
         
         const price = await contract.getPrice();
         const tx = await contract.buy(id, { value: price });
-        
-        showToast("Transaction Sent! Waiting...", false);
-        
         await tx.wait();
-        showToast("SUCCESS! You own Robot #" + id, false);
         
-        // Quick UI Refresh
-        renderGrid(); 
+        alert("Success! You bought Artwork #" + id);
+        location.reload(); 
       } catch (err) {
         console.error(err);
-        let msg = err.reason || err.message;
-        if (msg.includes("Limit 1")) msg = "You can only buy ONE robot!";
-        if (msg.includes("insufficient funds")) msg = "Not enough ETH!";
-        
-        showToast("Error: " + msg, true);
-        btn.innerText = originalText;
+        alert("Error: " + (err.reason || err.message));
+        btn.innerText = oldText;
         btn.disabled = false;
       }
     }
 
-    function showToast(message, isError) {
-      const toast = document.getElementById("toast");
-      toast.innerText = message;
-      toast.className = "show";
-      toast.style.borderLeftColor = isError ? "#ef4444" : "#10b981";
-      setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
-    }
-
-    function disableAllButtons(shouldDisable, text) {
-        const buttons = document.querySelectorAll(".btn-buy");
-        buttons.forEach(btn => {
+    function disableAllButtons(shouldDisable) {
+        document.querySelectorAll(".btn-buy").forEach(btn => {
              if (!btn.closest('.card').classList.contains('sold')) {
                  btn.disabled = shouldDisable;
-                 if (text) btn.innerText = text;
              }
         });
     }
-
+    
     function enableUnsoldButtons() {
-        const buttons = document.querySelectorAll(".btn-buy");
-        buttons.forEach(btn => {
-             // Only enable if not sold AND not currently mining
+        document.querySelectorAll(".btn-buy").forEach(btn => {
              if (!btn.closest('.card').classList.contains('sold') && btn.innerText !== "MINING...") {
                  btn.disabled = false;
              }

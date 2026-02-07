@@ -9,26 +9,42 @@ contract NFTDutchAuction {
     uint256 public startAt; 
     bool public ended;
     address public administrator;
+    
+    // Stores the link to your IPFS folder (e.g., "ipfs://QmXyZ.../")
+    string public baseURI; 
 
+    // Ledger of who owns what: ID 5 -> Alice's Address
     mapping(uint256 => address) public owners;
-    // NEW: Track who has already bought one
-    mapping(address => bool) public hasBought; 
 
     constructor() {
         administrator = msg.sender;
     }
 
+    // --- ADMIN TOOLS ---
     function startAuction() external {
-        require(msg.sender == administrator, "Only Admin can start!");
+        require(msg.sender == administrator, "Only Admin!");
         require(startAt == 0, "Already started!");
         startAt = block.timestamp;
     }
 
     function endAuction() external {
-        require(msg.sender == administrator, "Only Admin can end!");
+        require(msg.sender == administrator, "Only Admin!");
         ended = true;
     }
 
+    // Set the folder where images live (The "Reveal")
+    function setBaseURI(string memory _newURI) external {
+        require(msg.sender == administrator, "Only Admin!");
+        baseURI = _newURI;
+    }
+
+    function withdraw() external {
+        require(msg.sender == administrator, "Only Admin!");
+        (bool success, ) = payable(administrator).call{value: address(this).balance}("");
+        require(success, "Withdraw failed");
+    }
+
+    // --- PUBLIC TOOLS ---
     function getPrice() public view returns (uint256) {
         if (startAt == 0) return START_PRICE;
         if (ended) return 0;
@@ -40,33 +56,23 @@ contract NFTDutchAuction {
     }
 
     function buy(uint256 _id) external payable {
-        require(startAt != 0, "Not started yet!");
+        require(startAt != 0, "Class hasn't started!");
         require(!ended, "Auction stopped!");
         require(_id < 100, "Invalid ID");
         require(owners[_id] == address(0), "Item sold");
         
-        // NEW: FAIRNESS CHECK
-        require(!hasBought[msg.sender], "Limit 1 per wallet!"); 
+        // REMOVED: Fairness limit. Whales can now sweep the floor.
 
         uint256 price = getPrice();
         require(msg.value >= price, "Bid too low");
 
         owners[_id] = msg.sender;
-        hasBought[msg.sender] = true; // Mark them as having bought
 
         uint256 refund = msg.value - price;
         if (refund > 0) {
             (bool success, ) = payable(msg.sender).call{value: refund}("");
             require(success, "Refund failed");
         }
-    }
-
-    // NEW: WITHDRAW FUNCTION (Get your money!)
-    function withdraw() external {
-        require(msg.sender == administrator, "Only Admin can withdraw");
-        uint256 balance = address(this).balance;
-        (bool success, ) = payable(administrator).call{value: balance}("");
-        require(success, "Withdrawal failed");
     }
 
     function getOwner(uint256 _id) external view returns (address) {
